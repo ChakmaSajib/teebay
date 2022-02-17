@@ -1,0 +1,11 @@
+FROM node:16-alpine
+WORKDIR /app
+COPY ./package.json /app
+
+# install npm dependencies
+RUN yarn
+
+# copy other project files
+COPY . . 
+# build the folder
+CMD ["yarn","start"]
