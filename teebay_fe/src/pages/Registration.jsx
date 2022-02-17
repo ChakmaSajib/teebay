@@ -15,7 +15,6 @@ import {
   Box,
   Grid
 } from '@mui/material';
-import Layout from '../components/Layout';
 import useStyles from '../utils/styles';
 
 export default function Login() {

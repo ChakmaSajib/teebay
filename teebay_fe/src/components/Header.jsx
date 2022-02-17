@@ -8,6 +8,9 @@ import {
   Link
 } from '@mui/material';
 
+{
+  /** Demo data for testing purposes*/
+}
 const pages = ['Bought', 'Sold', 'Borrowed', 'Lent'];
 
 export default function Header() {

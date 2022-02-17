@@ -43,6 +43,8 @@ $ docker-compose up
 
 Since, our API's based on `GraphQL`
 <br>
+Please visit: `http://localhost:3000/graphql` - to open GraphQL Playground
+
 We have following
 <br>
 `Mutations`:
@@ -53,6 +55,7 @@ We have following
 - createProduct - to create a new product
 - addProduct - to add a new product
 - deleteProduct - to delete a product
+- more
 
 `Query`
 

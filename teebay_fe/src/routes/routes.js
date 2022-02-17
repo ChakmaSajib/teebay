@@ -4,8 +4,7 @@ import { Routes, Navigate } from 'react-router-dom';
 import { RoutePath } from "../utils/constant"
 import { Login, Registration, NotFound, AccountSetting, AddProduct, Products, AllProducts } from '../pages';
 import SingleProduct from '../components/SingleProduct';
-import Characters from '../components/Characters';
-import Character from '../components/Character';
+
 
 
 
@@ -27,8 +26,6 @@ function AppRoutes() {
                 <Route path={RoutePath.product} end element={<Products />} />
                 <Route path={RoutePath.allProducts} end element={<AllProducts />} />
                 <Route path={RoutePath.singleProduct} end element={<SingleProduct />} />
-                <Route path="/character" end element={<Characters />} />
-                <Route path="/character/:id" end element={<Character />} />
                 <Route path='*' element={<NotFound />} />
 
             </Routes>

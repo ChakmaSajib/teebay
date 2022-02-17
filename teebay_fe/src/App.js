@@ -5,7 +5,7 @@ import {
   CssBaseline,
 } from '@mui/material';
 import { theme } from './utils/theme';
-import character from './components/Characters';
+
 
 function App() {
 
@@ -14,7 +14,6 @@ function App() {
       <CssBaseline />
       <Layout>
         <AppRoutes />
-
       </Layout>
 
     </ThemeProvider>

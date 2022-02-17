@@ -258,7 +258,7 @@ export default function AddProduct() {
             </Grid>
 
             <ListItem sx={{ justifyContent: 'end' }}>
-              <Button variant='contained' color='primary' href='/products'>
+              <Button variant='contained' color='primary' href='/allproducts'>
                 Add Product
               </Button>
             </ListItem>
