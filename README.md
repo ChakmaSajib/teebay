@@ -90,6 +90,16 @@ brew services start postgresql
 psql -h localhost -d postgres -c 'create user root with superuser;'
 ```
 
+`Install PG-admin using Docker:`
+`$ docker run --rm -p 5050:5050 thajeztah/pgadmin4`
+
+Now manage your postgres from the browser by launching `http://localhost:5050` .
+<br>
+
+after inserting postgre bash then, run
+
+- psql [DBNAME [USERNAME]]
+
 Git development guide:
 
 ```

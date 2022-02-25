@@ -5,17 +5,17 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from "react-router-dom";
 import { SnackbarProvider } from 'notistack';
-import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from "@apollo/client";
 
 
 
 const client = new ApolloClient({
-  uri: process.env.REACT_APP_URI,
-  cache: new InMemoryCache()
+  uri: 'http://localhost:3000/graphql',
+  cache: new InMemoryCache(),
+  headers: {
+    authorization: localStorage.getItem('token') || ""
+  }
 });
-
-console.log(process.env.REACT_APP_URI)
-
 
 ReactDOM.render(
   <React.StrictMode>

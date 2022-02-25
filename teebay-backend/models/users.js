@@ -1,46 +1,45 @@
-const Sequelize = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('../utils/database');
 const Product = require('./products');
 
-// https://www.bezkoder.com/sequelize-associate-one-to-many/
-
-const User = db.define('users', {
+const User = db.define('user', {
     id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         autoIncrement: true,
         allowNull: false,
         primaryKey: true
     },
     first_name: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+
     },
     last_name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
+        type: DataTypes.STRING,
+        allowNull: true,
+
     },
     address: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: true,
 
     },
     email: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
     },
     password: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false
     },
     phone: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: true
-    },
+    }
+
 
 });
 
-User.hasMany(Product, { as: 'products', foreignKey: 'product_id' })
-Product.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(Product, { as: 'products' })
+Product.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 module.exports = User;

@@ -3,7 +3,8 @@ import { makeStyles } from '@mui/styles';
 const useStyles = makeStyles((theme) => {
     return {
         logo: {
-            flexGrow: 1
+            flexGrow: 1,
+
         },
         navbar: {
             backgroundColor: '#203040',
@@ -42,6 +43,14 @@ const useStyles = makeStyles((theme) => {
         },
         upperCase: {
             textTransform: "uppercase"
+        },
+        button: {
+            color: "white",
+            backgroundColor: "red"
+
+        },
+        grayColor: {
+            color: '#808080'
         }
     }
 

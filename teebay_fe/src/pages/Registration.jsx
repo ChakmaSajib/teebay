@@ -2,8 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
-import axios from 'axios';
-import Cookies from 'js-cookie';
 import {
   List,
   ListItem,
@@ -16,10 +14,11 @@ import {
   Grid
 } from '@mui/material';
 import useStyles from '../utils/styles';
+import { REGISTER_USER } from '../graphql/mutations';
+import { useMutation } from '@apollo/client';
 
 export default function Login() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-
   const classes = useStyles();
   const navigate = useNavigate();
   const {
@@ -27,6 +26,22 @@ export default function Login() {
     control,
     formState: { errors }
   } = useForm();
+
+  const [registerUser] = useMutation(REGISTER_USER, {
+    onCompleted(data) {
+      closeSnackbar();
+      enqueueSnackbar(`${data.registerUser.email} successfully registered`, {
+        variant: 'success'
+      });
+      navigate('/signin');
+    },
+    onError(error) {
+      closeSnackbar();
+      enqueueSnackbar(error.message, {
+        variant: 'error'
+      });
+    }
+  });
 
   const submitHandler = async ({
     first_name,
@@ -38,32 +53,22 @@ export default function Login() {
     confirmPassword
   }) => {
     closeSnackbar();
-    console.log(
-      email,
-      password,
-      phone,
-      address,
-      confirmPassword,
-      first_name,
-      last_name
-    );
     if (password !== confirmPassword) {
       enqueueSnackbar("Passwords don't match", { variant: 'error' });
       return;
-    }
-    try {
-      const { data } = await axios.post('/api/users/login', {
-        email,
-        password
+    } else {
+      await registerUser({
+        variables: {
+          registerInput: {
+            first_name,
+            last_name,
+            phone,
+            email,
+            password,
+            address
+          }
+        }
       });
-      Cookies.set('userInfo', data);
-      navigate.push('/dashboard');
-    } catch (error) {
-      console.log(error);
-      enqueueSnackbar(
-        error.response.data ? error.response.data.message : error.message,
-        { variant: 'error' }
-      );
     }
   };
 
@@ -98,6 +103,10 @@ export default function Login() {
                         id='first_name'
                         label='First Name'
                         inputProps={{ type: 'text' }}
+                        error={Boolean(errors.first_name)}
+                        helperText={
+                          errors.last_name ? 'First Name is required' : ''
+                        }
                         {...field}
                       ></TextField>
                     )}
@@ -120,6 +129,10 @@ export default function Login() {
                         id='last_name'
                         label='Last Name'
                         inputProps={{ type: 'text' }}
+                        error={Boolean(errors.last_name)}
+                        helperText={
+                          errors.last_name ? 'Last Name is required' : ''
+                        }
                         {...field}
                       ></TextField>
                     )}

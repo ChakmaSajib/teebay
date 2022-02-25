@@ -1,40 +1,43 @@
-
-const Sequelize = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('../utils/database');
 
 
 const Product = db.define('products', {
     id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         autoIncrement: true,
         allowNull: false,
         primaryKey: true
     },
     title: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
         unique: true
     },
     description: {
-        type: Sequelize.STRING,
-        allowNull: false,
+        type: DataTypes.TEXT,
     },
     price: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
     rent: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
-    category: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
-        allowNull: false
+    categories: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: true
     },
     options: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
+        type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: true
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
+
 });
 
 

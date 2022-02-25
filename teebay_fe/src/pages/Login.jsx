@@ -2,8 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+
 import {
   List,
   ListItem,
@@ -14,8 +13,9 @@ import {
   Paper,
   Box
 } from '@mui/material';
-import Layout from '../components/Layout';
 import useStyles from '../utils/styles';
+import { useMutation } from '@apollo/client';
+import { LOGIN_USER } from '../graphql/mutations';
 
 export default function Login() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -28,22 +28,25 @@ export default function Login() {
     formState: { errors }
   } = useForm();
 
-  const submitHandler = async ({ email, password }) => {
-    closeSnackbar();
-    try {
-      const { data } = await axios.post('/api/users/login', {
-        email,
-        password
-      });
-      Cookies.set('userInfo', data);
-      navigate.push('/dashboard');
-    } catch (error) {
-      console.log(error);
-      enqueueSnackbar(
-        error.response.data ? error.response.data.message : error.message,
-        { variant: 'error' }
-      );
+  const [signinUser] = useMutation(LOGIN_USER, {
+    onCompleted(data) {
+      closeSnackbar();
+      enqueueSnackbar('Login sucessful', { variant: 'success' });
+      localStorage.setItem('token', data.loginUser.token);
+      navigate('/profile');
+    },
+    onError(error) {
+      closeSnackbar();
+      enqueueSnackbar(error.message, { variant: 'error' });
     }
+  });
+
+  const submitHandler = async ({ email, password }) => {
+    await signinUser({
+      variables: {
+        loginInput: { email, password }
+      }
+    });
   };
 
   return (

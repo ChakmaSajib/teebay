@@ -2,25 +2,23 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import { useQuery, useMutation } from '@apollo/client';
 import {
   List,
   ListItem,
   Typography,
   TextField,
   Button,
-  Link,
   Paper,
   Box,
   Grid
 } from '@mui/material';
-import Layout from '../components/Layout';
 import useStyles from '../utils/styles';
+import { GET_USER_BY_ID } from '../graphql/queries';
+import { UPDATE_USER } from '../graphql/mutations';
 
 export default function AccountSetting() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-
   const classes = useStyles();
   const navigate = useNavigate();
   const {
@@ -28,6 +26,20 @@ export default function AccountSetting() {
     control,
     formState: { errors }
   } = useForm();
+  const { loading, error, data } = useQuery(GET_USER_BY_ID);
+  const [updateAccountSetting] = useMutation(UPDATE_USER, {
+    onCompleted(data) {
+      closeSnackbar();
+      console.log(data);
+      enqueueSnackbar(data.updateAccountSetting, { variant: 'success' });
+    },
+    onError(error) {
+      closeSnackbar();
+      enqueueSnackbar(error.message, { variant: 'error' });
+    }
+  });
+
+  if (loading) return <div>Loading... </div>;
 
   const submitHandler = async ({
     first_name,
@@ -35,226 +47,173 @@ export default function AccountSetting() {
     phone,
     email,
     password,
-    address,
-    confirmPassword
+    address
   }) => {
-    closeSnackbar();
-    console.log(
-      email,
-      password,
-      phone,
-      address,
-      confirmPassword,
-      first_name,
-      last_name
-    );
-    if (password !== confirmPassword) {
-      enqueueSnackbar("Passwords don't match", { variant: 'error' });
-      return;
-    }
-    try {
-      const { data } = await axios.post('/api/users/login', {
-        email,
-        password
-      });
-      Cookies.set('userInfo', data);
-      navigate.push('/dashboard');
-    } catch (error) {
-      console.log(error);
-      enqueueSnackbar(
-        error.response.data ? error.response.data.message : error.message,
-        { variant: 'error' }
-      );
-    }
+    first_name = first_name || data.getUserById.first_name;
+    last_name = last_name || data.getUserById.last_name;
+    email = email || data.getUserById.email;
+    address = address || data.getUserById.address;
+    phone = phone || data.getUserById.phone;
+    console.log(first_name, last_name, email, password, phone, address);
+    updateAccountSetting({
+      variables: {
+        userUpdateInput: {
+          first_name,
+          last_name,
+          email,
+          address,
+          phone,
+          password
+        }
+      }
+    });
+    return;
   };
 
   return (
-    <Layout>
-      <Box
-        container
-        display='flex'
-        justifyContent='center'
-        alignItems='center'
-        flexDirection='column'
-      >
-        <Typography component='h1' variant='h1'>
-          Account Setting
-        </Typography>
-        <Paper elevation={2} className={classes.paper}>
-          <form onSubmit={handleSubmit(submitHandler)}>
-            <List>
-              <Grid container>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <Controller
-                      name='first_name'
-                      control={control}
-                      defaultValue=''
-                      rules={{
-                        required: true
-                      }}
-                      render={({ field }) => (
-                        <TextField
-                          variant='outlined'
-                          fullWidth
-                          id='first_name'
-                          label='First Name'
-                          inputProps={{ type: 'text' }}
-                          {...field}
-                        ></TextField>
-                      )}
-                    ></Controller>
-                  </ListItem>
-                </Grid>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <Controller
-                      name='last_name'
-                      control={control}
-                      defaultValue=''
-                      rules={{
-                        required: true
-                      }}
-                      render={({ field }) => (
-                        <TextField
-                          variant='outlined'
-                          fullWidth
-                          id='last_name'
-                          label='Last Name'
-                          inputProps={{ type: 'text' }}
-                          {...field}
-                        ></TextField>
-                      )}
-                    ></Controller>
-                  </ListItem>
-                </Grid>
+    <Box
+      container
+      display='flex'
+      justifyContent='center'
+      alignItems='center'
+      flexDirection='column'
+    >
+      <Typography component='h1' variant='h1'>
+        Account Setting
+      </Typography>
+      <Paper elevation={2} className={classes.paper}>
+        <form onSubmit={handleSubmit(submitHandler)}>
+          <List>
+            <Grid container>
+              <Grid item xs={6}>
+                <ListItem>
+                  <Controller
+                    name='first_name'
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <TextField
+                        variant='outlined'
+                        fullWidth
+                        value={value || data.getUserById.first_name}
+                        id='first_name'
+                        label='First Name'
+                        inputProps={{ type: 'text' }}
+                        onChange={onChange}
+                      ></TextField>
+                    )}
+                  ></Controller>
+                </ListItem>
               </Grid>
-
-              <ListItem>
-                <Controller
-                  name='address'
-                  control={control}
-                  defaultValue=''
-                  rules={{
-                    required: true
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      variant='outlined'
-                      fullWidth
-                      id='address'
-                      label='Address'
-                      inputProps={{ type: 'text' }}
-                      {...field}
-                    ></TextField>
-                  )}
-                ></Controller>
-              </ListItem>
-
-              <Grid container>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <Controller
-                      name='email'
-                      control={control}
-                      defaultValue=''
-                      rules={{
-                        required: true,
-                        pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/
-                      }}
-                      render={({ field }) => (
-                        <TextField
-                          variant='outlined'
-                          fullWidth
-                          id='email'
-                          label='Email'
-                          inputProps={{ type: 'email' }}
-                          error={Boolean(errors.email)}
-                          helperText={
-                            errors.email
-                              ? errors.email.type === 'pattern'
-                                ? 'Email is not valid'
-                                : 'Email is required'
-                              : ''
-                          }
-                          {...field}
-                        ></TextField>
-                      )}
-                    ></Controller>
-                  </ListItem>
-                </Grid>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <Controller
-                      name='phone'
-                      control={control}
-                      defaultValue=''
-                      rules={{
-                        required: true,
-                        pattern: /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/
-                      }}
-                      render={({ field }) => (
-                        <TextField
-                          variant='outlined'
-                          fullWidth
-                          id='phone'
-                          label='Phone'
-                          inputProps={{ type: 'number' }}
-                          error={Boolean(errors.phone)}
-                          helperText={
-                            errors.phone
-                              ? errors.phone.type === 'pattern'
-                                ? 'Phone number is not valid'
-                                : 'Phone number is required'
-                              : ''
-                          }
-                          {...field}
-                        ></TextField>
-                      )}
-                    ></Controller>
-                  </ListItem>
-                </Grid>
+              <Grid item xs={6}>
+                <ListItem>
+                  <Controller
+                    name='last_name'
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <TextField
+                        variant='outlined'
+                        fullWidth
+                        id='last_name'
+                        label='Last Name'
+                        // defaultValue={data ? data.getUserById.last_name : ''}
+                        value={value || data.getUserById.last_name}
+                        onChange={onChange}
+                        inputProps={{ type: 'text' }}
+                      ></TextField>
+                    )}
+                  ></Controller>
+                </ListItem>
               </Grid>
+            </Grid>
 
-              <ListItem>
-                <Controller
-                  name='password'
-                  control={control}
-                  defaultValue=''
-                  rules={{
-                    required: true,
-                    minLength: 6
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      variant='outlined'
-                      fullWidth
-                      id='password'
-                      label='Password'
-                      inputProps={{ type: 'password' }}
-                      error={Boolean(errors.password)}
-                      helperText={
-                        errors.password
-                          ? errors.password.type === 'minLength'
-                            ? 'Password length is more than 5'
-                            : 'Password is required'
-                          : ''
-                      }
-                      {...field}
-                    ></TextField>
-                  )}
-                ></Controller>
-              </ListItem>
+            <ListItem>
+              <Controller
+                name='address'
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <TextField
+                    variant='outlined'
+                    fullWidth
+                    id='address'
+                    label='Address'
+                    // defaultValue={data ? data.getUserById.address : ''}
+                    inputProps={{ type: 'text' }}
+                    value={value || data.getUserById.address}
+                    onChange={onChange}
+                  ></TextField>
+                )}
+              ></Controller>
+            </ListItem>
 
-              <ListItem sx={{ justifyContent: 'center' }}>
-                <Button variant='contained' type='submit' color='primary'>
-                  Update
-                </Button>
-              </ListItem>
-            </List>
-          </form>
-        </Paper>
-      </Box>
-    </Layout>
+            <Grid container>
+              <Grid item xs={6}>
+                <ListItem>
+                  <Controller
+                    name='email'
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <TextField
+                        variant='outlined'
+                        fullWidth
+                        id='email'
+                        label='Email'
+                        // defaultValue={data ? data.getUserById.email : ''}
+                        inputProps={{ type: 'email' }}
+                        value={value || data.getUserById.email}
+                        onChange={onChange}
+                      ></TextField>
+                    )}
+                  ></Controller>
+                </ListItem>
+              </Grid>
+              <Grid item xs={6}>
+                <ListItem>
+                  <Controller
+                    name='phone'
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <TextField
+                        variant='outlined'
+                        fullWidth
+                        id='phone'
+                        label='Phone'
+                        inputProps={{ type: 'number' }}
+                        // defaultValue={data ? data.getUserById.phone : ''}
+                        value={value || data.getUserById.phone}
+                        onChange={onChange}
+                      ></TextField>
+                    )}
+                  ></Controller>
+                </ListItem>
+              </Grid>
+            </Grid>
+
+            <ListItem>
+              <Controller
+                name='password'
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <TextField
+                    variant='outlined'
+                    fullWidth
+                    id='password'
+                    label='Password'
+                    inputProps={{ type: 'password' }}
+                    value={value || ''}
+                    onChange={onChange}
+                  ></TextField>
+                )}
+              ></Controller>
+            </ListItem>
+
+            <ListItem sx={{ justifyContent: 'center' }}>
+              <Button variant='contained' type='submit' color='primary'>
+                Update
+              </Button>
+            </ListItem>
+          </List>
+        </form>
+      </Paper>
+    </Box>
   );
 }

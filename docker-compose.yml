@@ -11,6 +11,8 @@ services:
       - POSTGRES_DB=teebay_db
     volumes:
       - postgresdb:/var/lib/postgresql/data/
+    networks:
+      - teebay-backend
 
   teebay-backend:
     build:
@@ -29,6 +31,8 @@ services:
       - PGHOST=postgres
     depends_on:
       - postgres
+    networks:
+      - teebay-backend
 
   teebay-frontend:
     stdin_open: true
@@ -42,5 +46,12 @@ services:
       - ./teebay_fe:/app
     environment:
       - PORT=4000
+    networks:
+      - teebay-frontend
+      - teebay-backend
+
+networks:
+  teebay-frontend:
+  teebay-backend:
 volumes:
   postgresdb:

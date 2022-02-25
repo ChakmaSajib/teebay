@@ -9,7 +9,6 @@ import Grid from '@mui/material/Grid';
 
 export default function RentalPeriodDialog({ open, handleClose }) {
   const location = Navigate;
-  console.log(location);
 
   return (
     <div>

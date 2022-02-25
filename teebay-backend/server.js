@@ -3,11 +3,21 @@ const { ApolloServer } = require('apollo-server-express')
 const typeDefs = require('./typeDefs')
 const resolvers = require('./resolvers')
 const sequelize = require('./utils/database');
-const checkAuth = require('./middleware/checkAuth');
+const jwt = require('jsonwebtoken')
+// const cors = require('cors');
+require("dotenv").config()
+
+
+// CORS configuration
+const corsOptions = {
+    origin: 'http://localhost:4000',
+    credentials: true
+}
+
 
 async function startServer() {
     await sequelize.sync(
-        { force: false }
+        { alter: true }
     );
     const app = express()
 
@@ -17,9 +27,14 @@ async function startServer() {
          * giving permission to do an action or see a piece of data
          *
         **/
-
-        typeDefs, resolvers, context: ({ req }) => req
-
+        cors: corsOptions,
+        typeDefs, resolvers, context: ({ req }) => {
+            const { authorization } = req.headers
+            if (authorization) {
+                const user = jwt.verify(authorization, process.env.TOKEN_SECRET)
+                return { userId: user.id }
+            }
+        }
     })
 
     await apolloServer.start()
